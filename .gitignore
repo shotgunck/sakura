@@ -1,0 +1,9 @@
+/target
+Cargo.lock
+.history
+/src/main.exe
+/src/main.pdb
+temp.txt
+servericon.png
+.env
+.vscode

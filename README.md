@@ -1,0 +1,2 @@
+# sakura
+Rusty discord bot
