@@ -1,4 +1,4 @@
-![Image](https://i.imgur.com/cLPKmFQ.png)
+![Image](https://i.imgur.com/1faJ8kN.png)
 
 # sakura
 Rusty discord bot
