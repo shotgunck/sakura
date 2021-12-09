@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     config.add_command("gato", false);
     config.add_command("wa", false);
     config.add_command("bond", false);
-    //config.add_command("compile", false);
+    config.add_command("compile", false);
 
     let parser = Parser::new(config);
 
@@ -83,9 +83,9 @@ async fn handle_event(event: Event, http: Arc<HttpClient>, parser: Parser<'_>) -
                     utilities::bond(http, channel_id).await?;
                 },
 
-                //Some(Command { name: "compile", arguments, ..}) => {
-                  //  utilities::compile(http, channel_id, arguments);
-                //}
+                Some(Command { name: "compile", arguments, ..}) => {
+                    utilities::compile(http, channel_id, arguments.as_str().to_string()).await?;
+                }
 
                 Some(_) => {},
                 None => {}

@@ -46,3 +46,17 @@ pub struct BondResponse {
     pub code: String,
     pub guild: BondGuildInfo
 }
+
+#[derive(Serialize, Debug)]
+pub struct CompilerPost {
+    pub script: String,
+    pub language: String,
+    pub versionIndex: u8,
+    pub clientId: String,
+    pub clientSecret: String
+}
+
+#[derive(Deserialize, Debug)]
+pub struct CompilerResponse {
+    pub output: String,
+}
