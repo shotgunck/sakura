@@ -46,6 +46,10 @@ pub async fn ms(http: Arc<HttpClient>, channel_id: ChannelId, arguments: String)
 }
 
 pub async fn mcskin(http: Arc<HttpClient>, channel_id: ChannelId, arguments: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+    if arguments == "" {
+        http.create_message(channel_id).content("👨‍💻 Provide a player name plsss")?.exec().await?;
+    }
+
     let skinembed = EmbedBuilder::new()
         .title(&arguments)
         .color(0xff_b8_b8)
