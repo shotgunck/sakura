@@ -8,14 +8,14 @@ use super::structs;
 
 fn langmap() -> HashMap<String, u8> {
     let mut langver = HashMap::<String, u8>::new();
-    langver.insert("java".to_string(), 3); langver.insert("c".to_string(), 4); langver.insert("cpp".to_string(), 4);
-    langver.insert("php".to_string(), 3); langver.insert("perl".to_string(), 3); langver.insert("python3".to_string(), 3);
-    langver.insert("ruby".to_string(), 3); langver.insert("go".to_string(), 3); langver.insert("clojure".to_string(), 2);
-    langver.insert("sql".to_string(), 3); langver.insert("csharp".to_string(), 3); langver.insert("objc".to_string(), 3);
-    langver.insert("swift".to_string(), 3); langver.insert("brainfuck".to_string(), 0); langver.insert("lua".to_string(), 2);
-    langver.insert("rust".to_string(), 3); langver.insert("nodejs".to_string(), 3); langver.insert("coffeescript".to_string(), 3);
-    langver.insert("elixir".to_string(), 3); langver.insert("lolcode".to_string(), 0); langver.insert("kotlin".to_string(), 2);
-    langver.insert("groovy".to_string(), 3); langver.insert("octave".to_string(), 3);
+    langver.insert("java".into(), 3); langver.insert("c".into(), 4); langver.insert("cpp".into(), 4);
+    langver.insert("php".into(), 3); langver.insert("perl".into(), 3); langver.insert("python3".into(), 3);
+    langver.insert("ruby".into(), 3); langver.insert("go".into(), 3); langver.insert("clojure".into(), 2);
+    langver.insert("sql".into(), 3); langver.insert("csharp".into(), 3); langver.insert("objc".into(), 3);
+    langver.insert("swift".into(), 3); langver.insert("brainfuck".into(), 0); langver.insert("lua".into(), 2);
+    langver.insert("rust".into(), 3); langver.insert("nodejs".into(), 3); langver.insert("coffeescript".into(), 3);
+    langver.insert("elixir".into(), 3); langver.insert("lolcode".into(), 0); langver.insert("kotlin".into(), 2);
+    langver.insert("groovy".into(), 3); langver.insert("octave".into(), 3);
 
     langver
 }
@@ -28,7 +28,7 @@ pub async fn bond(http: Arc<HttpClient>, channel_id: ChannelId) -> Result<(), Bo
     let data = structs::BondPost {
         max_age: 86400,
         max_uses: 0,
-        target_application_id: "880218394199220334".to_string(),
+        target_application_id: "880218394199220334".into(),
         target_type: 2,
         temporary: false,
         validate: None
@@ -80,7 +80,7 @@ pub async fn compile(http: Arc<HttpClient>, channel_id: ChannelId, arguments: St
     let rex = Regex::new(r"((?s)\w+) ```\w+((?s).*?)```").unwrap(); //trash regex usr
     let stuff = rex.captures(&arguments).unwrap();
     let lang = stuff.get(1).unwrap().as_str();
-    let code = stuff.get(2).unwrap().as_str().to_string();
+    let code = stuff.get(2).unwrap().as_str().into();
 
     if !langmap().contains_key(lang) {
         http.create_message(channel_id).content("📜 Ight use valid syntax: `c | cpp | csharp | objc | java | nodejs | lua | rust | python3 | ruby | brainfuck | go | swift | perl | php | sql | clojure | coffeescript | elixir | lolcode | kotlin | groovy | octave`
@@ -93,7 +93,7 @@ fn main() { println!(\"workable code clentaminator\"); }
 
     let program = structs::CompilerPost {
         script: code,
-        language: lang.to_string(),
+        language: lang.into(),
         versionIndex: *langmap().get(lang).unwrap(),
         clientId: env::var("JD_CLI_ID")?,
         clientSecret: env::var("JD_CLI_SECRET")?

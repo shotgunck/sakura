@@ -8,6 +8,7 @@ use std::{env, error::Error, sync::Arc};
 use twilight_cache_inmemory::{InMemoryCache, ResourceType};
 use twilight_gateway::{cluster::Cluster, Event, Intents};
 use twilight_http::Client as HttpClient;
+use twilight_model::gateway::{payload::outgoing::update_presence::UpdatePresencePayload, presence::{ActivityType, MinimalActivity, Status}};
 use twilight_command_parser::{Command, CommandParserConfig, Parser};
 
 mod utilities;
@@ -38,7 +39,15 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 
     let http = Arc::new(HttpClient::new(token.clone()));
 
-    let (cluster, mut events) = Cluster::new(token.clone(), Intents::GUILD_MESSAGES | Intents::GUILD_VOICE_STATES).await?;
+    let (cluster, mut events) = Cluster::builder(token.clone(), Intents::GUILD_MESSAGES | Intents::GUILD_VOICE_STATES)
+        .presence(UpdatePresencePayload::new(vec![
+        MinimalActivity {
+            kind: ActivityType::Listening,
+            name: "bb?".into(),
+            url: None
+        }.into(),
+        ], false, None, Status::DoNotDisturb)?)
+        .build().await?;
     cluster.up().await;
 
     while let Some((_, event)) = events.next().await {
