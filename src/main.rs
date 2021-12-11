@@ -5,6 +5,7 @@ use dotenv::dotenv;
 use futures_util::StreamExt;
 use std::{env, error::Error, sync::Arc};
 
+use regex::Regex;
 use twilight_cache_inmemory::{InMemoryCache, ResourceType};
 use twilight_gateway::{cluster::Cluster, Event, Intents};
 use twilight_http::Client as HttpClient;
@@ -58,47 +59,46 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     Ok(())
 }
 
-async fn handle_event(event: Event, http: Arc<HttpClient>, parser: Parser<'_>) -> Result<(), Box<dyn Error + Send + Sync>> {
+async fn handle_event(event: Event, movedhttp: Arc<HttpClient>, parser: Parser<'_>) -> Result<(), Box<dyn Error + Send + Sync>> {
     match event {
         Event::MessageCreate(msg) => {
             let channel_id = msg.channel_id;
+            let rex = Regex::new(r" && ").unwrap();
+            let threads: Vec<&str> = rex.split(&msg.content).collect();
 
-            match parser.parse(&msg.content) {
-                Some(Command { name: "?", .. }) => {
-                    http.create_message(channel_id).content("hi babe")?.exec().await?;
-                },
-
-                Some(Command { name: "help", .. }) => {
-                    utilities::help(http, channel_id).await?;
-                },
-                
-                Some(Command { name: "mcskin", arguments, ..}) => {
-                    minecraft::mcskin(http, channel_id, arguments.as_str().to_string()).await?;
-                },
-
-                Some(Command { name: "ms", arguments, ..}) => {
-                    minecraft::ms(http, channel_id, arguments.as_str().to_string()).await?;
-                },
-
-                Some(Command { name: "gato", ..}) => {
-                    utilities::gato(http, channel_id).await?;
-                },
-
-                Some(Command { name: "wa", ..}) => {
-                    utilities::wa(http, channel_id).await?;
-                },
-
-                Some(Command { name: "bond", ..}) => {
-                    utilities::bond(http, channel_id).await?;
-                },
-
-                Some(Command { name: "compile", arguments, ..}) => {
-                    utilities::compile(http, channel_id, arguments.as_str().to_string()).await?;
+            for thread in threads.iter() {
+                let http = Arc::clone(&movedhttp);
+                match parser.parse(thread) {
+                    Some(Command { name: "?", .. }) => {
+                        http.create_message(channel_id).content("hi babe")?.exec().await?;
+                    },
+                    Some(Command { name: "help", .. }) => {
+                        utilities::help(http, channel_id).await?;
+                    },
+                    Some(Command { name: "mcskin", arguments, ..}) => {
+                        minecraft::mcskin(http, channel_id, arguments.as_str().to_string()).await?;
+                    },
+                    Some(Command { name: "ms", arguments, ..}) => {
+                        minecraft::ms(http, channel_id, arguments.as_str().to_string()).await?;
+                    },
+                    Some(Command { name: "gato", ..}) => {
+                        utilities::gato(http, channel_id).await?;
+                    },
+                    Some(Command { name: "wa", ..}) => {
+                        utilities::wa(http, channel_id).await?;
+                    },
+                    Some(Command { name: "bond", ..}) => {
+                        utilities::bond(http, channel_id).await?;
+                    },
+                    Some(Command { name: "compile", arguments, ..}) => {
+                        utilities::compile(http, channel_id, arguments.as_str().to_string()).await?;
+                    }
+                    
+                    Some(_) => {},
+                    None => {}
                 }
-
-                Some(_) => {},
-                None => {}
             }
+
         }
 
         Event::ShardConnected(_) => {

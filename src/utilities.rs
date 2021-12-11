@@ -106,8 +106,12 @@ fn main() { println!(\"workable code clentaminator\"); }
         .json::<structs::CompilerResponse>().await?;
 
     let rn = Timestamp::from_secs(SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs().try_into()?)?;
-    let outputembed = EmbedBuilder::new().title("📜 Output:").description(output.output).timestamp(rn).build();
-    http.create_message(channel_id).embeds(&[outputembed?])?.exec().await?;
+
+    http.create_message(channel_id).embeds(&[EmbedBuilder::new()
+        .title("📜 Output:")
+        .description(output.output)
+        .timestamp(rn)
+        .build()?])?.exec().await?;
 
     Ok(())
 }
@@ -116,12 +120,11 @@ pub async fn gato(http: Arc<HttpClient>, channel_id: ChannelId) -> Result<(), Bo
     let url = "https://aws.random.cat/meow?ref=apilist.fun";
     let body = reqwest::get(url).await?.json::<structs::Gato>().await?;
 
-    let gatopic = EmbedBuilder::new()
+    http.create_message(channel_id).embeds(&[EmbedBuilder::new()
         .title("gato")
         .color(0xff_b8_b8)
         .image(ImageSource::url(body.file)?)
-        .build();
-    http.create_message(channel_id).embeds(&[gatopic?])?.exec().await?;
+        .build()?])?.exec().await?;
 
     Ok(())
 }
@@ -130,12 +133,11 @@ pub async fn wa(http: Arc<HttpClient>, channel_id: ChannelId) -> Result<(), Box<
     let url = "https://api.waifu.pics/sfw/waifu";
     let body = reqwest::get(url).await?.json::<structs::Wa>().await?;
 
-    let wapic = EmbedBuilder::new()
+    http.create_message(channel_id).embeds(&[EmbedBuilder::new()
         .title("wa?!")
         .color(0xff_b8_b8)
         .image(ImageSource::url(body.url)?)
-        .build();
-    http.create_message(channel_id).embeds(&[wapic?])?.exec().await?;
+        .build()?])?.exec().await?;
 
     Ok(())
 }

@@ -7,10 +7,8 @@ author = ["shotgunck"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-base64 = "0.13.0"
 dotenv = "0.15.0"
 futures-util = { default-features = false, version = "0.3" }
-image = "0.23.14"
 regex = "1.5.4"
 reqwest = { version = "0.11", features = ["json"] }
 rocket = "0.4.2"
