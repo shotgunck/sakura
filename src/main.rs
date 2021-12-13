@@ -35,6 +35,7 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     config.add_command("wa", false);
     config.add_command("bond", false);
     config.add_command("compile", false);
+    config.add_command("achieve", false);
 
     let parser = Parser::new(config);
 
@@ -71,34 +72,36 @@ async fn handle_event(event: Event, movedhttp: Arc<HttpClient>, parser: Parser<'
                 match parser.parse(thread) {
                     Some(Command { name: "?", .. }) => {
                         http.create_message(channel_id).content("hi babe")?.exec().await?;
-                    },
+                    }
                     Some(Command { name: "help", .. }) => {
                         utilities::help(http, channel_id).await?;
-                    },
+                    }
                     Some(Command { name: "mcskin", arguments, ..}) => {
-                        minecraft::mcskin(http, channel_id, arguments.as_str().to_string()).await?;
-                    },
+                        minecraft::mcskin(http, channel_id, arguments.as_str().into()).await?;
+                    }
                     Some(Command { name: "ms", arguments, ..}) => {
-                        minecraft::ms(http, channel_id, arguments.as_str().to_string()).await?;
-                    },
+                        minecraft::ms(http, channel_id, arguments.as_str().into()).await?;
+                    }
                     Some(Command { name: "gato", ..}) => {
                         utilities::gato(http, channel_id).await?;
-                    },
+                    }
                     Some(Command { name: "wa", ..}) => {
                         utilities::wa(http, channel_id).await?;
-                    },
+                    }
                     Some(Command { name: "bond", ..}) => {
                         utilities::bond(http, channel_id).await?;
-                    },
-                    Some(Command { name: "compile", arguments, ..}) => {
-                        utilities::compile(http, channel_id, arguments.as_str().to_string()).await?;
                     }
-                    
-                    Some(_) => {},
+                    Some(Command { name: "compile", arguments, ..}) => {
+                        utilities::compile(http, channel_id, arguments.as_str().into()).await?;
+                    }
+                    Some(Command { name: "achieve", arguments, ..}) => {
+                        minecraft::achieve(http, channel_id, arguments.as_str().into()).await?;
+                    }
+
+                    Some(_) => {}
                     None => {}
                 }
             }
-
         }
 
         Event::ShardConnected(_) => {

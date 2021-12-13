@@ -4,8 +4,6 @@ version = "0.1.0"
 edition = "2021"
 author = ["shotgunck"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 dotenv = "0.15.0"
 futures-util = { default-features = false, version = "0.3" }
@@ -13,6 +11,7 @@ regex = "1.5.4"
 reqwest = { version = "0.11", features = ["json"] }
 rocket = "0.4.2"
 serde = "1.0.130"
+#songbird = { features = ["driver", "twilight-rustls", "zlib-stock"], version =  "0.2.0-beta.3" }
 tokio = { features = ["macros", "rt-multi-thread"], version = "1.0" }
 twilight-gateway = "0.8.0"
 twilight-http = "0.8.0"
@@ -22,8 +21,3 @@ twilight-standby = "0.8.0"
 twilight-command-parser = "0.8.0"
 twilight-cache-inmemory = "0.8.0"
 twilight-embed-builder = "0.8.0"
-
-[dependencies.songbird]
-version = "0.2.0-beta.3"
-default-features = false
-features = ["driver", "twilight-rustls", "zlib-stock"]

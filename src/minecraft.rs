@@ -55,3 +55,14 @@ pub async fn mcskin(http: Arc<HttpClient>, channel_id: ChannelId, arguments: Str
     }
     Ok(())
 }
+
+pub async fn achieve(http: Arc<HttpClient>, channel_id: ChannelId, arguments: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+    http.create_message(channel_id).embeds(&[EmbedBuilder::new()
+        .title("​")
+        .color(0xff_b8_b8)
+        .image(ImageSource::url(format!("https://minecraft-api.com/api/achivements/cake/achievement..got/{}", arguments))?)
+        .build()?
+    ])?.exec().await?;
+
+    Ok(())
+}
