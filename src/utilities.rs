@@ -1,10 +1,9 @@
 use regex::Regex;
-use std::{collections::HashMap, env, error::Error, sync::Arc, time::{SystemTime, UNIX_EPOCH}};
-use twilight_http::Client as HttpClient;
-use twilight_model::{id::ChannelId as ChannelId, datetime::Timestamp};
-use twilight_embed_builder::{EmbedBuilder, EmbedFieldBuilder, EmbedFooterBuilder, ImageSource};
+use std::collections::HashMap;
+use std::{env, error::Error};
+use serenity::{model::channel::Message, prelude::*, utils::Colour};
 
-use super::structs;
+use super::{structs, minecraft, music};
 
 fn langmap() -> HashMap<String, u8> {
     let mut langver = HashMap::<String, u8>::new();
@@ -20,124 +19,148 @@ fn langmap() -> HashMap<String, u8> {
     langver
 }
 
-pub async fn bond(http: Arc<HttpClient>, channel_id: ChannelId) -> Result<(), Box<dyn Error + Send + Sync>> {
-    let url = format!("https://discord.com/api/v8/channels/{}/invites", channel_id);
+pub async fn init(msg: &Message, ctx: &Context, thread: String) -> Result<(), Box<dyn Error + Send + Sync>> {
+    let stuff: Vec<&str> = Regex::new(r"\s").unwrap().split(&thread).collect();//.captures(&thread).unwrap().get(1).unwrap().as_str();
+    let cmd = stuff[0];
+    let args = Regex::new(&format!(r"{} ", &cmd)).unwrap().replace(&thread, "");
+    let rn = chrono::Utc::now();
+
+    match cmd {
+        "?" => { msg.channel_id.say(&ctx.http, "hi babe").await?; }
     
-    let rn = Timestamp::from_secs(SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs().try_into()?)?;
+        "help" => {
+            msg.channel_id.send_message(&ctx.http, |m| {
+                m.content("comg");
+                m.embed(|e| {
+                    e.title("Sakura");
+                    e.description("Rust powered naruto gal");
+                    e.thumbnail("https://i.imgur.com/cLPKmFQ.png");
+                    e.color(Colour::from_rgb(255, 184, 184));
+                    e.field("Current prefix: `bb`", "----------------------------", false);
+                    e.field("Commands:", "? - see if im on
+                    help    - helplist
+                    ms      - show a mc server's status
+                    mcskin  - mc player skin get
+                    gato    - gato helicoper
+                    wa      - degeneralte
+                    compile - compile ur spaghetti", false);
+                    e.footer(|f| {
+                        f.text("oki, have fun"); f
+                    });
+                    e.timestamp(&rn);
+                    e
+                });
+                m
+            }).await?;
+        }
+        
+        "compile" => {
+            let rex = Regex::new(r"((?s)\w+) ```\w+((?s).*?)```").unwrap(); //trash regex usr
+            let stuff = rex.captures(&args).unwrap();
+            let lang = stuff.get(1).unwrap().as_str();
+            let code = stuff.get(2).unwrap().as_str().into();
 
-    let data = structs::BondPost {
-        max_age: 86400,
-        max_uses: 0,
-        target_application_id: "880218394199220334".into(),
-        target_type: 2,
-        temporary: false,
-        validate: None
-    };
-    let invite = reqwest::Client::new().post(url)
-        .json(&data)
-        .header("Authorization", format!("Bot {}", env::var("BOT_TOKEN")?))
-        .header("Content-Type", "application/json")
-        .send().await?
-        .json::<structs::BondResponse>().await?;
+            if !langmap().contains_key(lang) {
+                msg.channel_id.say(&ctx.http, "📜 Ight use valid syntax: `c | cpp | csharp | objc | java | nodejs | lua | rust | python3 | ruby | brainfuck | go | swift | perl | php | sql | clojure | coffeescript | elixir | lolcode | kotlin | groovy | octave`
+        __**Example:**__
+        bbcompile rust \\`\\`\\`rust
+        fn main() { println!(\"workable code clentaminator\"); }
+        \\`\\`\\`
+        ").await?;
+            } else {
+                let program = structs::CompilerPost {
+                    script: code,
+                    language: lang.into(),
+                    versionIndex: *langmap().get(lang).unwrap(),
+                    clientId: env::var("JD_CLI_ID")?,
+                    clientSecret: env::var("JD_CLI_SECRET")?
+                };
+            
+                let url = "https://api.jdoodle.com/v1/execute";
+                let output = reqwest::Client::new().post(url)
+                    .json(&program)
+                    .send().await?
+                    .json::<structs::CompilerResponse>().await?;
+
+                msg.channel_id.send_message(&ctx.http, |m| {
+                    m.embed(|e| {
+                        e.title("📜 Output:");
+                        e.description(output.output);
+                        e.color(Colour::from_rgb(255, 184, 184));
+                        e.timestamp(&rn);
+                        e
+                    });
+                    m
+                }).await?;
+            }
+        }
+
+        "bond" => {
+            let url = format!("https://discord.com/api/v8/channels/{}/invites", msg.channel_id);
     
-    let bondinvite = EmbedBuilder::new()
-        .title(format!("💞 {}'s bonding time!", invite.guild.name))
-        .field(EmbedFieldBuilder::new("Click to join:", format!("https://discord.gg/{}", invite.code)))
-        .color(0xff_b8_b8)
-        .timestamp(rn)
-        .build();
-    http.create_message(channel_id).embeds(&[bondinvite?])?.exec().await?;
+            let data = structs::BondPost {
+                max_age: 86400,
+                max_uses: 0,
+                target_application_id: "880218394199220334".into(),
+                target_type: 2,
+                temporary: false,
+                validate: None
+            };
+            let invite = reqwest::Client::new().post(url)
+                .json(&data)
+                .header("Authorization", format!("Bot {}", env::var("BOT_TOKEN")?))
+                .header("Content-Type", "application/json")
+                .send().await?
+                .json::<structs::BondResponse>().await?;
+            msg.channel_id.send_message(&ctx.http, |m| {
+                m.embed(|e| {
+                    e.title(format!("💞 {}'s bonding time!", invite.guild.name));
+                    e.field("Click to join: ", format!("https://discord.gg/{}", invite.code), false);
+                    e.color(Colour::from_rgb(255, 184, 184));
+                    e.timestamp(&rn);
+                    e
+                });
+                m
+            }).await?;
+        }
 
-    Ok(())
-}
+        "wa" => {
+            let url = "https://api.waifu.pics/sfw/waifu";
+            let body = reqwest::get(url).await?.json::<structs::Wa>().await?;
+            msg.channel_id.send_message(&ctx.http, |m| {
+                m.embed(|e| {
+                    e.title("wa,,");
+                    e.color(Colour::from_rgb(255, 184, 184));
+                    e.image(body.url);
+                    e
+                });
+                m
+            }).await?;
+        }
 
-pub async fn help(http: Arc<HttpClient>, channel_id: ChannelId) -> Result<(), Box<dyn Error + Send + Sync>> {
-    let rn = Timestamp::from_secs(SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs().try_into()?)?;
+        "gato" => {
+            let url = "https://aws.random.cat/meow?ref=apilist.fun";
+            let body = reqwest::get(url).await?.json::<structs::Gato>().await?;
+            msg.channel_id.send_message(&ctx.http, |m| {
+                m.embed(|e| {
+                    e.title("gatex");
+                    e.color(Colour::from_rgb(255, 184, 184));
+                    e.image(body.file);
+                    e.timestamp(&rn);
+                    e
+                });
+                m
+            }).await?;
+        }
 
-    let helpembed = EmbedBuilder::new()
-        .title("Sakura")
-        .description("Rust powered naruto gal")
-        .thumbnail(ImageSource::url("https://i.imgur.com/cLPKmFQ.png")?)
-        .color(0xff_b8_b8)
-        .field(EmbedFieldBuilder::new("Current prefix: `bb`", "----------------------------").inline())
-        .field(EmbedFieldBuilder::new("Commands:", "? - see if im on
-            help - helplist
-            ms - show a mc server's status
-            mcskin - mc player skin get
-            gato - gato helicoper
-            wa - degeneralte
-            compile - compile ur spaghetti
-        "))
-        .footer(EmbedFooterBuilder::new("oki, have fun"))
-        .timestamp(rn)
-        .build();
-    http.create_message(channel_id).embeds(&[helpembed?])?.exec().await?;
+        "ms" => { minecraft::ms(msg, ctx, args.into()).await?; }
+        "mcskin" => { minecraft::mcskin(msg, ctx, args.into()).await?; }
+        "achieve" => { minecraft::achieve(msg, ctx, args.into()).await?; }
 
-    Ok(())
-}
+        "play" => { music::play(msg, ctx, args.into()).await?; }
 
-pub async fn compile(http: Arc<HttpClient>, channel_id: ChannelId, arguments: String) -> Result<(), Box<dyn Error + Send + Sync>> {
-    let rex = Regex::new(r"((?s)\w+) ```\w+((?s).*?)```").unwrap(); //trash regex usr
-    let stuff = rex.captures(&arguments).unwrap();
-    let lang = stuff.get(1).unwrap().as_str();
-    let code = stuff.get(2).unwrap().as_str().into();
-
-    if !langmap().contains_key(lang) {
-        http.create_message(channel_id).content("📜 Ight use valid syntax: `c | cpp | csharp | objc | java | nodejs | lua | rust | python3 | ruby | brainfuck | go | swift | perl | php | sql | clojure | coffeescript | elixir | lolcode | kotlin | groovy | octave`
-__**Example:**__
-bbcompile rust \\`\\`\\`rust
-fn main() { println!(\"workable code clentaminator\"); }
-\\`\\`\\`
-")?.exec().await?;
+        _ => {}
     }
-
-    let program = structs::CompilerPost {
-        script: code,
-        language: lang.into(),
-        versionIndex: *langmap().get(lang).unwrap(),
-        clientId: env::var("JD_CLI_ID")?,
-        clientSecret: env::var("JD_CLI_SECRET")?
-    };
-
-    let url = "https://api.jdoodle.com/v1/execute";
-    let output = reqwest::Client::new().post(url)
-        .json(&program)
-        .send().await?
-        .json::<structs::CompilerResponse>().await?;
-
-    let rn = Timestamp::from_secs(SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs().try_into()?)?;
-
-    http.create_message(channel_id).embeds(&[EmbedBuilder::new()
-        .title("📜 Output:")
-        .description(output.output)
-        .timestamp(rn)
-        .build()?])?.exec().await?;
-
-    Ok(())
-}
-
-pub async fn gato(http: Arc<HttpClient>, channel_id: ChannelId) -> Result<(), Box<dyn Error + Send + Sync>> {
-    let url = "https://aws.random.cat/meow?ref=apilist.fun";
-    let body = reqwest::get(url).await?.json::<structs::Gato>().await?;
-
-    http.create_message(channel_id).embeds(&[EmbedBuilder::new()
-        .title("gato")
-        .color(0xff_b8_b8)
-        .image(ImageSource::url(body.file)?)
-        .build()?])?.exec().await?;
-
-    Ok(())
-}
-
-pub async fn wa(http: Arc<HttpClient>, channel_id: ChannelId) -> Result<(), Box<dyn Error + Send + Sync>> {
-    let url = "https://api.waifu.pics/sfw/waifu";
-    let body = reqwest::get(url).await?.json::<structs::Wa>().await?;
-
-    http.create_message(channel_id).embeds(&[EmbedBuilder::new()
-        .title("wa?!")
-        .color(0xff_b8_b8)
-        .image(ImageSource::url(body.url)?)
-        .build()?])?.exec().await?;
 
     Ok(())
 }

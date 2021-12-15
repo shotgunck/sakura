@@ -1,23 +1,16 @@
 [package]
 name = "sakura"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
-author = ["shotgunck"]
 
 [dependencies]
+chrono = { version = "0.4.10", default-features = false, features = ["clock"] }
 dotenv = "0.15.0"
-futures-util = { default-features = false, version = "0.3" }
+lavalink-rs = { version = "0.9.0-rc.1", default-features = false, features = ["rustls", "serenity", "songbird", "normal-log"] }
 regex = "1.5.4"
 reqwest = { version = "0.11", features = ["json"] }
 rocket = "0.4.2"
 serde = "1.0.130"
-#songbird = { features = ["driver", "twilight-rustls", "zlib-stock"], version =  "0.2.0-beta.3" }
-tokio = { features = ["macros", "rt-multi-thread"], version = "1.0" }
-twilight-gateway = "0.8.0"
-twilight-http = "0.8.0"
-twilight-lavalink = "0.8.0"
-twilight-model = "0.8.0"
-twilight-standby = "0.8.0"
-twilight-command-parser = "0.8.0"
-twilight-cache-inmemory = "0.8.0"
-twilight-embed-builder = "0.8.0"
+serenity = { version = "0.10.9", default-features = false, features = ["client", "gateway", "rustls_backend", "model", "voice", "cache"] }
+songbird = "0.2.0"
+tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
