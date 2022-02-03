@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::{env, error::Error};
 use serenity::{model::channel::Message, prelude::*, utils::Colour};
 
-use super::{structs, minecraft, music};
+use super::{structs, minecraft};
 
 fn langmap() -> HashMap<String, u8> {
     let mut langver = HashMap::<String, u8>::new();
@@ -25,9 +25,7 @@ pub async fn init(msg: &Message, ctx: &Context, thread: String) -> Result<(), Bo
     let args = Regex::new(&format!(r"{} ", &cmd)).unwrap().replace(&thread, "");
     let rn = chrono::Utc::now();
 
-    match cmd {
-        "?" => { msg.channel_id.say(&ctx.http, "hi babe").await?; }
-    
+    match cmd {    
         "help" => {
             msg.channel_id.send_message(&ctx.http, |m| {
                 m.content("comg");
@@ -37,10 +35,10 @@ pub async fn init(msg: &Message, ctx: &Context, thread: String) -> Result<(), Bo
                     e.thumbnail("https://i.imgur.com/cLPKmFQ.png");
                     e.color(Colour::from_rgb(255, 184, 184));
                     e.field("Current prefix: `bb`", "----------------------------", false);
-                    e.field("Commands:", "? - see if im on
-                    help    - helplist
-                    ms      - show a mc server's status
-                    mcskin  - mc player skin get
+                    e.field("Commands:", "
+                    help    - show commands
+                    ms      - show a minecraft server's status
+                    mcskin  - get a minecraft player's skin
                     gato    - gato helicoper
                     wa      - degeneralte
                     compile - compile ur spaghetti", false);
@@ -55,7 +53,7 @@ pub async fn init(msg: &Message, ctx: &Context, thread: String) -> Result<(), Bo
         }
         
         "compile" => {
-            let rex = Regex::new(r"((?s)\w+) ```\w+((?s).*?)```").unwrap(); //trash regex usr
+            let rex = Regex::new(r"((?s)\w+) ```\w+((?s).*?)```").unwrap(); // workable
             let stuff = rex.captures(&args).unwrap();
             let lang = stuff.get(1).unwrap().as_str();
             let code = stuff.get(2).unwrap().as_str().into();
@@ -156,8 +154,6 @@ pub async fn init(msg: &Message, ctx: &Context, thread: String) -> Result<(), Bo
         "ms" => { minecraft::ms(msg, ctx, args.into()).await?; }
         "mcskin" => { minecraft::mcskin(msg, ctx, args.into()).await?; }
         "achieve" => { minecraft::achieve(msg, ctx, args.into()).await?; }
-
-        "play" => { music::play(msg, ctx, args.into()).await?; }
 
         _ => {}
     }

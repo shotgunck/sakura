@@ -39,7 +39,7 @@ pub async fn ms(msg: &Message, ctx: &Context, arg: String) -> Result<(), Box<dyn
 
 pub async fn mcskin(msg: &Message, ctx: &Context, arguments: String) -> Result<(), Box<dyn Error + Send + Sync>> {
     if arguments == "" {
-        msg.channel_id.say(&ctx.http, "👨‍💻 Provide a player name plsss").await?;
+        msg.channel_id.say(&ctx.http, "👨‍💻 Provide a player name pls").await?;
     } else {
         msg.channel_id.send_message(&ctx.http, |m| {
             m.embed(|e| {
@@ -51,6 +51,7 @@ pub async fn mcskin(msg: &Message, ctx: &Context, arguments: String) -> Result<(
             m
         }).await?;
     }
+    
     Ok(())
 }
 

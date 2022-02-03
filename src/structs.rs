@@ -1,5 +1,4 @@
 use serde::{Serialize, Deserialize};
-use serenity::model::channel::Message;
 
 #[derive(Deserialize, Debug)]
 pub struct Motd {
@@ -61,5 +60,3 @@ pub struct CompilerPost {
 pub struct CompilerResponse {
     pub output: String
 }
-
-pub struct Lavalink;
