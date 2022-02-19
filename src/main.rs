@@ -1,6 +1,4 @@
-#![feature(proc_macro_hygiene, decl_macro)]
-#[macro_use] extern crate rocket;
-
+use actix_web::{App, get, HttpServer, Responder};
 use dotenv::dotenv;
 use std::{env, error::Error};
 use regex::Regex;
@@ -13,7 +11,19 @@ mod minecraft;
 struct Handler;
 
 #[get("/")]
-fn comg() -> &'static str { "sakura v3" }
+async fn comg() -> impl Responder { "sakura さくら v4" }
+
+#[actix_web::main]
+async fn live() -> Result<(), Box<dyn Error>> {
+    HttpServer::new(|| {
+        App::new().service(comg)
+    })
+    .bind(env::var("URL").unwrap())?
+    .run()
+    .await?;
+
+    Ok(())
+}
 
 #[async_trait]
 impl EventHandler for Handler {
@@ -32,8 +42,8 @@ impl EventHandler for Handler {
     }
 
     async fn ready(&self, _: Context, _: Ready) {
-        println!("sakura is on");
-        rocket::ignite().mount("/", routes![comg]).launch();
+        println!("sakura さくら v4 op");
+        live().expect("uhh actix errored");
     }
 }
 
@@ -43,9 +53,9 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 
     let token = env::var("BOT_TOKEN")?;
     let mut client = Client::builder(&token).event_handler(Handler).await.expect("could not make client");
-    
+
     if let Err(why) = client.start().await {
-        println!("startup failure {:?}", why);
+        println!("startup failure {:?}", why)
     }
     Ok(())
 }
