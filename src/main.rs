@@ -18,7 +18,7 @@ async fn live() -> Result<(), Box<dyn Error>> {
     HttpServer::new(|| {
         App::new().service(comg)
     })
-    .bind(env::var("URL").unwrap())?
+    .bind("0.0.0.0:8088")?
     .run()
     .await?;
 

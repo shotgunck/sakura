@@ -69,9 +69,9 @@ pub async fn init(msg: &Message, ctx: &Context, thread: String) -> Result<(), Bo
                 let program = structs::CompilerPost {
                     script: code,
                     language: lang.into(),
-                    versionIndex: *langmap().get(lang).unwrap(),
-                    clientId: env::var("JD_CLI_ID")?,
-                    clientSecret: env::var("JD_CLI_SECRET")?
+                    version_index: *langmap().get(lang).unwrap(),
+                    client_id: env::var("JD_CLI_ID")?,
+                    client_secret: env::var("JD_CLI_SECRET")?
                 };
             
                 let url = "https://api.jdoodle.com/v1/execute";
@@ -83,7 +83,7 @@ pub async fn init(msg: &Message, ctx: &Context, thread: String) -> Result<(), Bo
                 msg.channel_id.send_message(&ctx.http, |m| {
                     m.embed(|e| {
                         e.title("📜 Output:");
-                        e.description(output.output);
+                        e.description(format!("`{}`", output.output));
                         e.color(Colour::from_rgb(255, 184, 184));
                         e.timestamp(&rn);
                         e

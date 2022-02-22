@@ -51,9 +51,9 @@ pub struct BondResponse {
 pub struct CompilerPost {
     pub script: String,
     pub language: String,
-    pub versionIndex: u8,
-    pub clientId: String,
-    pub clientSecret: String
+    pub version_index: u8,
+    pub client_id: String,
+    pub client_secret: String
 }
 
 #[derive(Deserialize, Debug)]
