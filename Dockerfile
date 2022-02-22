@@ -3,6 +3,6 @@ FROM rustlang/rust:nightly
 WORKDIR /app
 COPY . .
 
-RUN cargo build --release
+RUN cargo run --release
 
 CMD ./target/release/sakura
