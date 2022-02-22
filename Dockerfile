@@ -1,6 +1,6 @@
 FROM rustlang/rust:nightly
 
-WORKDIR /app
+WORKDIR /usr/src/sakura
 COPY . .
 
 RUN cargo run --release
