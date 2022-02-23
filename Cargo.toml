@@ -4,7 +4,6 @@ version = '0.4.0'
 edition = '2021'
 
 [dependencies]
-actix-web = '3'
 chrono = { version = '0.4.10', default-features = false, features = ['clock'] }
 dotenv = '0.15.0'
 regex = '1.5.4'
