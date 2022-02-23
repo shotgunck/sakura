@@ -1,3 +1,4 @@
+use actix_web::{App, get, HttpServer, Responder};
 use dotenv::dotenv;
 use std::{env, error::Error};
 use regex::Regex;
@@ -8,6 +9,21 @@ mod structs;
 mod minecraft;
 
 struct Handler;
+
+#[get("/")]
+async fn comg() -> impl Responder { "sakura さくら v4" }
+
+#[actix_web::main]
+async fn live() -> Result<(), Box<dyn Error>> {
+    HttpServer::new(|| {
+        App::new().service(comg)
+    })
+    .bind("0.0.0.0:8088").unwrap()
+    .run()
+    .await?;
+
+    Ok(())
+}
 
 #[async_trait]
 impl EventHandler for Handler {
@@ -27,6 +43,7 @@ impl EventHandler for Handler {
 
     async fn ready(&self, _: Context, _: Ready) {
         println!("sakura さくら v4 op");
+        live().expect("uhh can't start actix")
     }
 }
 
