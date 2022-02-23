@@ -18,7 +18,7 @@ async fn live() -> Result<(), Box<dyn Error>> {
     HttpServer::new(|| {
         App::new().service(comg)
     })
-    .bind("0.0.0.0:8088").unwrap()
+    .bind(format!("0.0.0.0:{}", env::var("PORT")?)).unwrap()
     .run()
     .await?;
 
