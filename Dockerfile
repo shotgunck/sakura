@@ -13,6 +13,9 @@ ENV PKG_CONFIG_ALLOW_CROSS=1
 WORKDIR /usr/src/sakura
 COPY . .
 
+RUN apt-get -y update
+RUN apt-get -y install libopus0
 RUN cargo build --release
+RUN cargo run
 
 CMD ./target/release/sakura
