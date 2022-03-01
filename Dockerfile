@@ -16,6 +16,5 @@ COPY . .
 RUN apt-get -y update
 RUN apt-get -y install libopus0
 RUN cargo build --release
-RUN cargo run
 
-CMD ./target/release/sakura
+ENTRYPOINT ["./target/release/sakura"]
