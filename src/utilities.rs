@@ -1,23 +1,23 @@
 use std::{env, error::Error};
 use serenity::{model::{channel::Message, invite::InviteTargetType}, prelude::*, utils::Colour};
 use regex::Regex;
+use genius_rs::Genius;
 
 use super::{helper::{langmap, bondapp}, structs::{CompilerPost, CompilerResponse, Gato, Wa, Starwa}};
 
 pub async fn exec(cmd: &str, msg: &Message, ctx: &Context, args: String) -> Result<(), Box<dyn Error + Send + Sync>> {
     let rn = chrono::Utc::now();
-    
+    let embed_color = Colour::from_rgb(242, 82, 120);
+
     match cmd {
         "help" => {
-            let rn = chrono::Utc::now();
-
             msg.channel_id.send_message(ctx, |m| {
                 m.content("comg");
                 m.embed(|e| {
                     e.title("Sakura");
                     e.description("Rust powered naruto gal");
                     e.thumbnail("https://i.imgur.com/cLPKmFQ.png");
-                    e.color(Colour::from_rgb(255, 184, 184));
+                    e.color(embed_color);
                     e.field("Current prefix: `bb`", "----------------------------", false);
                     e.field("Commands:", "
                     `bond` - Bonding activities
@@ -49,7 +49,9 @@ pub async fn exec(cmd: &str, msg: &Message, ctx: &Context, args: String) -> Resu
             if lang_version == 1 {
                 msg.channel_id.say(ctx, "📜 Ight use valid syntax: `c | cpp | csharp | objc | java | nodejs | lua | rust | python3 | ruby | brainfuck | go | swift | perl | php | sql | clojure | coffeescript | elixir | lolcode | kotlin | groovy | octave`
                 __**Example:**__ bbcompile rust \\`\\`\\`rust
-                fn main() { println!(\"workable code clentaminator\"); }
+                fn main() {
+                    println!(\"bb naoh\")
+                }
                 \\`\\`\\`").await?;
             } else {
                 let program = CompilerPost {
@@ -69,7 +71,7 @@ pub async fn exec(cmd: &str, msg: &Message, ctx: &Context, args: String) -> Resu
                     m.embed(|e| {
                         e.title("📜 Output:");
                         e.description(format!("```{}```", data.output));
-                        e.color(Colour::from_rgb(255, 184, 184));
+                        e.color(embed_color);
                         e.footer(|f| f.text(format!("CPU time: {}ms", data.cpuTime)));
                         e.timestamp(&rn);
                         e
@@ -77,7 +79,7 @@ pub async fn exec(cmd: &str, msg: &Message, ctx: &Context, args: String) -> Resu
                     m
                 }).await?;
             }
-        },
+        }
 
         "bond" => {
             let guild = msg.guild(&ctx.cache).await.unwrap();
@@ -111,14 +113,34 @@ pub async fn exec(cmd: &str, msg: &Message, ctx: &Context, args: String) -> Resu
                     e.title(format!("💞 {} bonding time", &guild.name));
                     e.description(format!("🔸 Activity: {}", &args));
                     e.thumbnail(guild.icon_url().unwrap());
-                    e.color(Colour::from_rgb(255, 184, 184));
+                    e.color(embed_color);
                     e.field(format!("Join {:?}", channel_name), invite.url(), false);
                     e.timestamp(&rn);
                     e
                 });
                 m
             }).await?;
-        },
+        }
+
+        "find" => {
+            let genius = Genius::new(env::var("GENIUS_TOKEN")?);
+            let res = genius.search(&args).await.unwrap();
+            let data = &res[0].result;
+            let artist = &data.primary_artist;
+
+            msg.channel_id.send_message(ctx, |m| {
+                m.embed(|e| {
+                    e.title(data.title.as_str());
+                    e.description(format!("By [{}]({})", artist.name, artist.url));
+                    e.color(embed_color);
+                    e.field("More about song:", data.url.as_str(), false);
+                    e.thumbnail(artist.header_image_url.as_str());
+                    e.image(data.song_art_image_url.as_str());
+                    e
+                });
+                m
+            }).await?;
+        }
 
         "wa" => {
             if !msg.channel(&ctx.cache).await.unwrap().is_nsfw() {
@@ -139,7 +161,7 @@ pub async fn exec(cmd: &str, msg: &Message, ctx: &Context, args: String) -> Resu
             msg.channel_id.send_message(ctx, |m| {
                 m.embed(|e| {
                     e.title("wa");
-                    e.color(Colour::from_rgb(255, 184, 184));
+                    e.color(embed_color);
                     e.image(img);
                     e
                 });
@@ -150,10 +172,11 @@ pub async fn exec(cmd: &str, msg: &Message, ctx: &Context, args: String) -> Resu
         "gato" => {
             let url = "https://aws.random.cat/meow?ref=apilist.fun";
             let body = reqwest::get(url).await?.json::<Gato>().await?;
+
             msg.channel_id.send_message(ctx, |m| {
                 m.embed(|e| {
                     e.title("gatex");
-                    e.color(Colour::from_rgb(255, 184, 184));
+                    e.color(embed_color);
                     e.image(body.file);
                     e.timestamp(&rn);
                     e

@@ -4,9 +4,10 @@ version = '0.5.0'
 edition = '2021'
 
 [dependencies]
-actix-web = '3'
+actix-web = '4'
 chrono = { version = '0.4.19', default-features = false, features = ['clock'] }
 dotenv = '0.15.0'
+genius-rs = '0.3.0'
 lavalink-rs = { git = "https://gitlab.com/vicky5124/lavalink-rs/", branch = "master", default-features = false, features = ["rustls", "serenity", "songbird", "normal-log"] }
 regex = '1.5.4'
 reqwest = { version = '0.11', features = ['json'] }

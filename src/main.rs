@@ -14,6 +14,7 @@ mod structs;
 mod utilities;
 
 use structs::{Handler, Lavalink, LavalinkHandler, SerenityContext};
+use command_parser::parse;
 
 impl TypeMapKey for Lavalink {
     type Value = LavalinkClient;
@@ -52,15 +53,15 @@ async fn live() -> Result<(), Box<dyn Error>> {
 #[async_trait]
 impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
-        if !msg.author.bot {
-            let compound_rex = Regex::new(r" && ").unwrap();
-            let prefix_rex = Regex::new(r"bb |bb").unwrap();
-            let threads: Vec<&str> = compound_rex.split(&msg.content).collect();
+        if msg.author.bot {return}
+
+        let compound_rex = Regex::new(r" && ").unwrap();
+        let prefix_rex = Regex::new(r"bb |bb").unwrap();
+        let threads: Vec<&str> = compound_rex.split(&msg.content).collect();
             
-            if prefix_rex.is_match(&msg.content) {
-                for thread in threads.iter() {
-                    command_parser::parse(&msg, &ctx, prefix_rex.replace(&thread.to_ascii_lowercase(), "").into()).await.expect("can't exec cmd");
-                }
+        if prefix_rex.is_match(&msg.content) {
+            for thread in threads.iter() {
+                parse(&msg, &ctx, prefix_rex.replace(&thread.to_ascii_lowercase(), "").into()).await.expect("can't exec cmd");
             }
         }
     }
